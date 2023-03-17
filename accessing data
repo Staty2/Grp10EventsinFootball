@@ -42,17 +42,16 @@ column_order = ['id', 'index', 'period', 'type.id', 'type.name', 'timestamp', 'm
 
 #indexs:
 # pass: 24-34
-# carry: 35
+# carry: 35-35
 # ball_receipt: 36-37
-# substitution: 38-39
-# bad_behaviour: 40-41
-# tactics: 42
-# duel: 43-46
-# interception: 47-48
-# shot: 49-64
-# shot.freeze_frame: 65-68
-# goalkeeper: 69-76
-# dribble: 77-80
+# substitution: 38-41
+# bad_behaviour: 42-43
+# tactics: 44-44
+# duel: 45-47
+# interception: 48-49
+# shot: 50-64
+# goalkeeper: 65-72
+# dribble: 73-76
 
 
 #without IDs:
