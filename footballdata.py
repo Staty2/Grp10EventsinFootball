@@ -103,11 +103,11 @@ def findingallnames(matches):
 
     
 
-def firstsub_web_network(match_df):
+def firstsub_web_network(match_df,team1,team2):
+    #make a cpoy of the dataframe
     df = match_df.copy()
-    teams = list(set(df['possession_team.name']))
-    #only show the passes by chelsea
-    df = df[df['team.name']==teams[0]]
+    #only use the passes by team1
+    df = df[df['team.name']==team1]
     #create new columns
     df['passer'] = df['player.id']
     df['recipient'] = df['pass.recipient.id']
@@ -161,15 +161,15 @@ def firstsub_web_network(match_df):
     pass_nodes = pitch.scatter(df_avlocations.x, df_avlocations.y,
                                 s=df_avlocations.marker_size,
                                 color='red', edgecolors='black', linewidth=1, alpha=1, ax=ax)
-    fig.suptitle(f'{teams[0]} average positions and passes against\n {teams[1]} before first sub on minute {first_sub}', color='white', fontsize=35)
+    fig.suptitle(f'{team1} average positions and passes against\n {team2} before first sub on minute {first_sub}', color='white', fontsize=35)
     
-    #label the nodes
+    #abbrivate all the positions 
     formation_dict = {1: 'GK', 2: 'RB', 3: 'RCB', 4: 'CB', 5: 'LCB', 6: 'LB', 7: 'RWB',
                       8: 'LWB', 9: 'RDM', 10: 'CDM', 11: 'LDM', 12: 'RM', 13: 'RCM',
                       14: 'CM', 15: 'LCM', 16: 'LM', 17: 'RW', 18: 'RAM', 19: 'CAM',
                       20: 'LAM', 21: 'LW', 22: 'RCF', 23: 'ST', 24: 'LCF', 25: 'SS'}
     df_avlocations['position_abrv'] = df_avlocations.position.map(formation_dict)
-    
+    #plot all nodes
     for index, row in df_avlocations.iterrows():
         pitch.annotate(row.position_abrv, xy=(row.x, row.y), c='white', va='center',
                        ha='center', size=16, weight='bold', ax=ax)
@@ -182,7 +182,7 @@ def firstsub_web_network(match_df):
 
 matches = findingallmatches('Manchester City WFC','Chelsea FCW','18_19.json')
 match_df = regorganise_match(f'{matches[0]}.json')
-firstsub_web_network(match_df)
+firstsub_web_network(match_df,'Manchester City WFC','Chelsea FCW')
 
 
 
