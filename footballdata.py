@@ -51,21 +51,6 @@ def regorganise_match(match):
     # Reorder the columns
     df = df.reindex(columns=column_order)
     
-    
-    
-    #without IDs:
-    # column_order = ['id', 'index', 'period', 'type.name', 'timestamp', 'minute', 'second', 'possession', 'possession_team.name',
-    #                 'play_pattern.name', 'team.name', 'player.name', 'position.name', 'location', 'duration', 'under_pressure', 
-    #                 'counterpress', 'related_events', 'pass.recipient.name', 'pass.length','pass.angle', 'pass.height.name',
-    #                 'pass.end_location', 'pass.body_part.name', 'pass.type.name', 'carry.end_location', 'ball_receipt.outcome.name', 
-    #                 'substitution.outcome.name', 'substitution.replacement.name', 'bad_behaviour.card.name', 'tactics.formation', 
-    #                 'duel.type.name', 'duel.outcome.name', 'interception.outcome.name', 'shot.statsbomb_xg', 'shot.end_location', 
-    #                 'shot.key_pass_id', 'shot.outcome.name', 'shot.body_part.name', 'shot.technique.name', 'shot.type.name', 
-    #                 'shot.freeze_frame.location', 'shot.freeze_frame.player.name', 'shot.freeze_frame.position.name', 
-    #                 'shot.freeze_frame.teammate', 'goalkeeper.technique.name', 'goalkeeper.body_part.name', 'goalkeeper.position.name', 
-    #                 'goalkeeper.type.name', 'goalkeeper.outcome.name', 'dribble.outcome.name', 'dribble.overrun', 'dribble.nutmeg', 
-    #                 'ball_receipt.outcome.name']
-    
     return df
 
 
