@@ -179,10 +179,11 @@ def firstsub_web_network(match_df,team1,team2):
 
 
 
-
-matches = findingallmatches('Manchester City WFC','Chelsea FCW','18_19.json')
+team1 = 'Manchester City WFC'
+team2 = 'Chelsea FCW'
+matches = findingallmatches(team1,team2,'18_19.json')
 match_df = regorganise_match(f'{matches[0]}.json')
-firstsub_web_network(match_df,'Manchester City WFC','Chelsea FCW')
+firstsub_web_network(match_df,team1,team2)
 
 
 
