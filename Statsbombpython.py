@@ -11,8 +11,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import to_rgba
-from mplsoccer import Pitch, FontManager, Sbopen
-from mplsoccer import Pitch
+from mplsoccer import Pitch, FontManager
 pitch = Pitch()
 
 #Combining all 3 seasons into one dataframe
@@ -23,13 +22,12 @@ frames = [matches1819, matches1920, matches2021]
 FAWSL = pd.concat(frames)
 
 
-def findingallmatches(team1, team2, dataframe):
+def findingallmatches(team1, team2, all_matches):
     '''
     findingallmatches('Manchester City WFC','Chelsea FCW', FAWSL)
     '''
-    match_ids = []
-    
-    for index, row in dataframe.iterrows():
+    match_ids = []        
+    for index, row in all_matches.iterrows():
         # Check if the home team is team1 and the away team is team2
         if row['home_team'] == team1 and row['away_team'] == team2:
             # Print the match ID if the teams match
@@ -42,13 +40,13 @@ def findingallmatches(team1, team2, dataframe):
     
     return match_ids
 
-def findingallnames(dataframe):
+def findingallnames(all_matches):
     '''
     findingallnames(FAWSL)
     '''
     # Extract the unique team names from the home and away team columns
-    home_teams = set(dataframe['home_team'])
-    away_teams = set(dataframe['away_team'])
+    home_teams = set(all_matches['home_team'])
+    away_teams = set(all_matches['away_team'])
     
     # Combine the unique team names from both columns into a set
     team_names = home_teams.union(away_teams)
@@ -140,9 +138,54 @@ def firstsub_web_network(team1,team2,match_df):
 
 
 
-events = sb.events(match_id=7298)
+def Xthreat(team1,team2,all_matches):
+    bins = (16, 12)
+    #find all matches
+    match_ids = findingallmatches(team1, team2, all_matches)
+    print(match_ids)
+    
+    # next we create a dataframe of all the events
+    all_events_df = []
+    
+    cols = ['match_id', 'id', 'type', 'player',
+            'location', 'shot_end_location', 'pass_end_location',
+            'carry_end_location', 'shot_outcome', 'shot_statsbomb_xg']
+    for match in match_ids:
+        # get carries/ passes/ shots
+        event = sb.events(match_id=match)  # get the first dataframe (events) which has index = 0
+        event = event.loc[event.type.isin(['Carry', 'Shot', 'Pass']), cols].copy()
+    
+        # boolean columns for working out probabilities
+        event['goal'] = event['shot_outcome'] == 'Goal'
+        event['shoot'] = event['type'] == 'Shot'
+        event['move'] = event['type'] != 'Shot'
+        event[['x', 'y']] = event['location'].apply(lambda x: pd.Series([x[0], x[1]]))
+        event.loc[event['carry_end_location'].notnull(), ['c_end_x', 'c_end_y']] = event.loc[event['carry_end_location'].notnull(), 'carry_end_location'].apply(lambda x: pd.Series([x[0], x[1]]))
+        event.loc[event['pass_end_location'].notnull(), ['p_end_x', 'p_end_y']] = event.loc[event['pass_end_location'].notnull(), 'pass_end_location'].apply(lambda x: pd.Series([x[0], x[1]]))
+        event.loc[event['shot_end_location'].notnull(), ['s_end_x', 's_end_y']] = event.loc[event['shot_end_location'].notnull(), 'shot_end_location'].apply(lambda x: pd.Series([x[0], x[1]]))
+        print(event['c_end_x'])
+        event[['end_x', 'end_y']] = event.apply(lambda row: row['carry_end_location'] + row['pass_end_location'] + row['shot_end_location'], axis=1)
 
+
+        all_events_df.append(event)
+        
+    event = pd.concat(all_events_df)
+    
+    shot_probability = pitch.bin_statistic(event['x'], event['y'], values=event['shoot'],
+                                       statistic='mean', bins=bins)
+    move_probability = pitch.bin_statistic(event['x'], event['y'], values=event['move'],
+                                       statistic='mean', bins=bins)
+    goal_probability = pitch.bin_statistic(event.loc[event['shoot'], 'x'],
+                                       event.loc[event['shoot'], 'y'],
+                                       event.loc[event['shoot'], 'goal'],
+                                       statistic='mean', bins=bins)
+    fig, ax = pitch.draw()
+    shot_heatmap = pitch.heatmap(shot_probability, ax=ax)
+    return
+    
+events = sb.events(match_id=7298)
 team1 = 'Manchester City WFC'
 team2 = 'Chelsea FCW'
 firstsub_web_network(team1,team2,events)
+Xthreat(team1,team2,matches1819)
 
