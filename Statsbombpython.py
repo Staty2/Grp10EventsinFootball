@@ -138,7 +138,13 @@ def firstsub_web_network(team1,team2,match_df):
 
 
 
-def Xthreat(team1,team2,all_matches):
+def Xthreat_which(which,team1,team2,all_matches):
+    '''
+    matches1819 = sb.matches(competition_id=37, season_id = 4)
+    team1 = 'Manchester City WFC'
+    team2 = 'Chelsea FCW'
+    Xthreat_which(shot_probability,team1,team2,matches1819)
+    '''
     bins = (16, 12)
     #find all matches
     match_ids = findingallmatches(team1, team2, all_matches)
@@ -147,9 +153,7 @@ def Xthreat(team1,team2,all_matches):
     # next we create a dataframe of all the events
     all_events_df = []
     
-    cols = ['match_id', 'id', 'type', 'player',
-            'location', 'shot_end_location', 'pass_end_location',
-            'carry_end_location', 'shot_outcome', 'shot_statsbomb_xg']
+    cols = ['match_id', 'id', 'type', 'player','location']
     for match in match_ids:
         # get carries/ passes/ shots
         event = sb.events(match_id=match)  # get the first dataframe (events) which has index = 0
@@ -160,16 +164,12 @@ def Xthreat(team1,team2,all_matches):
         event['shoot'] = event['type'] == 'Shot'
         event['move'] = event['type'] != 'Shot'
         event[['x', 'y']] = event['location'].apply(lambda x: pd.Series([x[0], x[1]]))
-        event.loc[event['carry_end_location'].notnull(), ['c_end_x', 'c_end_y']] = event.loc[event['carry_end_location'].notnull(), 'carry_end_location'].apply(lambda x: pd.Series([x[0], x[1]]))
-        event.loc[event['pass_end_location'].notnull(), ['p_end_x', 'p_end_y']] = event.loc[event['pass_end_location'].notnull(), 'pass_end_location'].apply(lambda x: pd.Series([x[0], x[1]]))
-        event.loc[event['shot_end_location'].notnull(), ['s_end_x', 's_end_y']] = event.loc[event['shot_end_location'].notnull(), 'shot_end_location'].apply(lambda x: pd.Series([x[0], x[1]]))
-        print(event['c_end_x'])
-        event[['end_x', 'end_y']] = event.apply(lambda row: row['carry_end_location'] + row['pass_end_location'] + row['shot_end_location'], axis=1)
-
 
         all_events_df.append(event)
         
     event = pd.concat(all_events_df)
+    
+    pitch = Pitch(pitch_type='statsbomb', pitch_color='#22312b', line_color='#c7d5cc', line_zorder=2)
     
     shot_probability = pitch.bin_statistic(event['x'], event['y'], values=event['shoot'],
                                        statistic='mean', bins=bins)
@@ -179,13 +179,18 @@ def Xthreat(team1,team2,all_matches):
                                        event.loc[event['shoot'], 'y'],
                                        event.loc[event['shoot'], 'goal'],
                                        statistic='mean', bins=bins)
-    fig, ax = pitch.draw()
-    shot_heatmap = pitch.heatmap(shot_probability, ax=ax)
-    return
     
+    fig, ax = pitch.draw(figsize=(16, 11), constrained_layout=True, tight_layout=False)
+    fig.set_facecolor("#22312b")
+    shot_heatmap = pitch.heatmap(which, ax=ax)
+    
+    return
+
+
+
 events = sb.events(match_id=7298)
 team1 = 'Manchester City WFC'
 team2 = 'Chelsea FCW'
 firstsub_web_network(team1,team2,events)
-Xthreat(team1,team2,matches1819)
+Xthreat_which(shot_probability,team1,team2,matches1819)
 
