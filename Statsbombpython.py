@@ -143,7 +143,7 @@ def Xthreat_which(which,team1,team2,all_matches):
     matches1819 = sb.matches(competition_id=37, season_id = 4)
     team1 = 'Manchester City WFC'
     team2 = 'Chelsea FCW'
-    Xthreat_which(shot_probability,team1,team2,matches1819)
+    Xthreat_which('shot',team1,team2,matches1819)
     '''
     bins = (16, 12)
     #find all matches
@@ -153,7 +153,7 @@ def Xthreat_which(which,team1,team2,all_matches):
     # next we create a dataframe of all the events
     all_events_df = []
     
-    cols = ['match_id', 'id', 'type', 'player','location']
+    cols = ['match_id', 'id', 'type', 'player','location','shot_outcome']
     for match in match_ids:
         # get carries/ passes/ shots
         event = sb.events(match_id=match)  # get the first dataframe (events) which has index = 0
@@ -179,18 +179,26 @@ def Xthreat_which(which,team1,team2,all_matches):
                                        event.loc[event['shoot'], 'y'],
                                        event.loc[event['shoot'], 'goal'],
                                        statistic='mean', bins=bins)
+    if which == 'shot':
+        fig, ax = pitch.draw(figsize=(16, 11), constrained_layout=True, tight_layout=False)
+        fig.set_facecolor("#22312b")
+        shot_heatmap = pitch.heatmap(shot_probability, ax=ax)
     
-    fig, ax = pitch.draw(figsize=(16, 11), constrained_layout=True, tight_layout=False)
-    fig.set_facecolor("#22312b")
-    shot_heatmap = pitch.heatmap(which, ax=ax)
+    elif which == 'move':
+        fig, ax = pitch.draw(figsize=(16, 11), constrained_layout=True, tight_layout=False)
+        fig.set_facecolor("#22312b")
+        shot_heatmap = pitch.heatmap(move_probability, ax=ax)
+        
+    elif which == 'goal':
+        fig, ax = pitch.draw(figsize=(16, 11), constrained_layout=True, tight_layout=False)
+        fig.set_facecolor("#22312b")
+        shot_heatmap = pitch.heatmap(goal_probability, ax=ax)
     
     return
 
 
 
-events = sb.events(match_id=7298)
 team1 = 'Manchester City WFC'
 team2 = 'Chelsea FCW'
-firstsub_web_network(team1,team2,events)
-Xthreat_which(shot_probability,team1,team2,matches1819)
+Xthreat_which('shot',team1,team2,matches1819)
 
