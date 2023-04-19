@@ -1,0 +1,73 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Apr 19 14:42:58 2023
+
+@author: joshu
+"""
+
+from statsbombpy import sb
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from mplsoccer import Pitch, VerticalPitch, FontManager, Sbopen
+import warnings
+warnings.filterwarnings('ignore')
+import seaborn as sns
+import ast
+from sklearn.cluster import KMeans
+from sklearn import preprocessing
+
+"""
+competitions = sb.competitions()
+#print(competitions)
+
+matches = sb.matches(competition_id=37, season_id = 90)
+#print(matches)
+
+events = sb.events(match_id=3764238) #this is the 130th game, West Ham United LFC vs Arsenal WFC
+#print(events.columns)
+#print(events)
+"""
+parser = Sbopen()
+match_files = [19736, 19785]
+df = pd.concat([parser.event(file)[0] for file in match_files])
+"""
+events1 = sb.events(match_id=19736) 
+events2 = sb.events(match_id=19785) 
+events = pd.concat([events1, events2])
+"""
+
+mask_arsenal_tackle_success1 = (df.team_name == 'Arsenal WFC') & (df.type_name == 'Duel') & (df.outcome_name == 'Success In Play')
+df_tacklesuccess1 = df.loc[mask_arsenal_tackle_success1, ['x', 'y']]
+mask_arsenal_tackle_success2 = (df.team_name == 'Arsenal WFC') & (df.type_name == 'Duel') & (df.outcome_name == 'Won')
+df_tacklesuccess2 = df.loc[mask_arsenal_tackle_success2, ['x', 'y']]
+mask_arsenal_tackle_success3 = (df.team_name == 'Arsenal WFC') & (df.type_name == 'Duel') & (df.outcome_name == 'Success Out')
+df_tacklesuccess3 = df.loc[mask_arsenal_tackle_success3, ['x', 'y']]
+df_tacklesuccess = pd.concat([df_tacklesuccess1, df_tacklesuccess2, df_tacklesuccess3])
+print(df_tacklesuccess)
+
+mask_arsenal_tackle_loss1 = (df.team_name == 'Arsenal WFC') & (df.type_name == 'Duel') & (df.outcome_name == 'Lost In Play')
+df_tackleloss1 = df.loc[mask_arsenal_tackle_loss1, ['x', 'y']]
+mask_arsenal_tackle_loss2 = (df.team_name == 'Arsenal WFC') & (df.type_name == 'Duel') & (df.outcome_name == 'Lost out')
+df_tackleloss2 = df.loc[mask_arsenal_tackle_loss2, ['x', 'y']]
+mask_arsenal_tackle_loss3 = (df.team_name == 'Arsenal WFC') & (df.type_name == 'Duel') & (df.outcome_name == 'Aerial Lost')
+df_tackleloss3 = df.loc[mask_arsenal_tackle_loss3, ['x', 'y']]
+df_tackleloss = pd.concat([df_tackleloss1, df_tackleloss2, df_tackleloss3])
+print(df_tackleloss)
+
+
+pitch = VerticalPitch(half= False)
+fig, ax = pitch.draw(figsize=(10,8))
+#ARSENAL
+                   #SIZE: s=shots_arsenal['shot_statsbomb_xg']*100+100, 
+                   #COLOURMAP: cmap='RdYlGn', c=shots_arsenal['shot_statsbomb_xg']
+sc = pitch.scatter(df_tacklesuccess.x, df_tacklesuccess.y, 
+                   c= 'blue',
+                   ax=ax,
+                  label= 'Successful Tackles')
+sc = pitch.scatter(df_tackleloss.x, df_tackleloss.y, 
+                   c= 'red', marker = 's',
+                   ax=ax,
+                  label= 'Unsucessful Tackles')
+fig.text(0.2,0.97, 'Arsenal Tackles against Chelsea 2018/19', size = 20, ha = 'left')         
+ax.legend()
